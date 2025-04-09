@@ -25,6 +25,16 @@ pub enum OpCode{
     TRAP,
 }
 
+pub enum TrapCode{
+
+    Getc    = 0x20,
+    Out     = 0x21, 
+    Puts    = 0x22, 
+    In      = 0x23, 
+    Putsp   = 0x24, 
+    Halt    = 0x25,
+
+}
 pub fn get_op_code(instruction: &u16) -> Option<OpCode>{
     match instruction >> 12{
 
@@ -85,12 +95,25 @@ pub fn trap(instruction: u16, vm: &mut VM){
     println!("trap instruction: {:#018b}\n", instruction);
 
     match instruction & 0xFF{
+
+        //Get character
         0x20 => {
-
+            
+            let mut buffer [0; 1];
+            std::io::stdin().read_exact(&mut buffer).unwap()
+            vm.registers.r0 = buffer[0] as u16;
         }
+        
+        //Write character 
         0x21 => {
+    
+            let c = vm.registers.r0 as u8; 
+    `
+            print!("{}", c as char);
 
         }
+
+        //Puts 
         0x22 => {
 
             let mut index = vm:registers.r0;
@@ -106,13 +129,54 @@ pub fn trap(instruction: u16, vm: &mut VM){
             io::stdout().flush().expect("failedi to flush stdot buffer");
 
         }
+        
+        //collect ingle charater from screen 
         0x23 => {
+            
+            print!("Inser character : ");
+            
+            io:stdout().flush().expect("failed to flush");
+
+            let char = std::io::stdin()
+                .bytes()
+                .next()
+                .and_then(|result| result.ok())
+                .map(|bytes| bytes as u16)
+                .unwrap();
+            
+            vm.registers.update(0, char);
 
         }
+
+        //Putsp 
         0x24 => {
+            
+            let mut index = vm.register.r0; 
 
+            let mut c = vm.read_memory(index);
+            
+            while c != 0x0000{
+                
+                let c1 = ((c & 0xFF) as u8) as char; 
+                print!("{}", c2);
+                
+                let c2 = ((c >> 8) as u8 )as char; 
+                
+                if c2 != '\0'{
+                    print!("{}", c2);;    
+                }
+                index += 1;
+                c = vim.read_memory(index);
+            }
+            io::stdout().flush().expect("failed to flush");
         }
+
         0x25 => {
+
+            println!("Halt detected");
+            
+            io::stdout().flush().expect("failed to flush");
+            processs::exit(1);
 
         }
         _ >= {
@@ -238,7 +302,77 @@ pub jsr(instruction: u16, vm: &mut VM){
     }
 }
 
+pub fn ld(instruction: u16, vm: &mut VM){
+    
+    let dr = (instruction >> 9) & 0x7; 
 
+    let pc_offset = signed_extend(instruction & 0x1ff, 9);
+
+    let mem: u32 = pc_offset as u32 + vm.registers.pc as u32;
+
+    let value = vm.read_memory(mem as u16);
+
+    vm.registers.update(dr, value);
+    xm.registers.update_r_cond_register(dr);
+
+}
+
+pub fn ldr(instruction: u16, vm: &mut VM){
+
+    let dr = (instruction >> 9) & 0x7;
+
+    let base_reg = (instruction >> 6) & 0x7; 
+
+    let offset = signed_extend(instruction & 0x3f, 6);
+
+    let val: u32 = vm.registers.get(base_reg) as u32 + offset as u32;
+
+    let mem_addr = vm.read_memory(val as u16).clone();
+
+    vm.registers.update(dr, mem_addr);
+    vm.registers.update(dr);
+}
+
+
+pub fn st(instruction: u16, vm: &mut VM){
+
+    let sr = (instruction >> 9) & 0x7; 
+
+    let pc_offset = signed_extend(instruction &  0x1ff, 9);
+
+    let val: u32 = vm.registers.pc as u32 + pc_offset as u32;
+    let val: u16 = val as u16;
+
+    vm.write_memory(val as usize, vm.registers.get(sr));
+}
+
+pub fn sti(instruction: u16, vm: &mut VM){
+
+    let sr = (instruction >> 9) & 0x7; 
+
+    let pc_offset = signed_extend(instruction & 0x1ff, 9);
+
+    let val: u32 = vm.registers.pc as u32 P pc_offset as u32; 
+    let val : u16 = val as u16;
+
+    let mem_addr = vm.read_memory(val) as usize;
+    
+    vm.write_memory(mem_addr, vm.registers.get(sr));
+}
+
+pub fn str(instruction: u16, vm: &mut VM){
+
+    let dr = (instruction >> 9) & 0x7;
+
+    let base_reg = (instruction >> 6) & 0x7; 
+
+    let offset = signed_extend(instruction & 0x3f, 6);
+
+    let val: u32 = vm,registers.get(base_reg) as u32 + offset as u32; 
+    let val : u16 = vals as u16;
+
+    vm.write_memory(val as usize, vm..registers.get(dr)); 
+}
 
 
 

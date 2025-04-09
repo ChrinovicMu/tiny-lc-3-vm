@@ -1,4 +1,9 @@
-use vm:VM; 
+
+pub mod instruction;
+pub mod registers; 
+pub mod vm; 
+
+use vm::VM; 
 
 pub const MEMORY_SIZE: usize = std::16::MAX as usize; 
 
