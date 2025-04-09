@@ -132,8 +132,115 @@ pub fn add(instruction: u16, vm: &mut VM){
     let imm_flag == 1 {
 
         let imm5 = signed_extend(instruction & 0x1F, 5);
-        let val: u32 == imm5 as u32 + vm.registers.get(sr1) as u32; 
+        let val: u32 = imm5 as u32 + vm.registers.get(sr1) as u32; 
         vm.regsters.update(dr, val as u16);
     }
+    else{
+        
+        let sr2 = instruction & 0x7 
+        let val : u32 = vm.registers.get(sr1) as u32 + vm.registers.get(sr2) as u32; 
+        vm.registers.update(dr, val as u16);
+    }
+
+    vm.registers.update_r_cond_register(dr);  
+
+}
+
+
+pub fn ldi(instruction: u16, vm: &mut VM){
+    
+    let dr = (instruction >> 9) & 0x7; 
+
+    let pc_offset = signed_extend(instruction & 0x1ff, 9);
+
+    let first_read = vm.read_memory(vm.registers.pc + pc_offset);
+
+    let result_address = vm.read_memory(first_read);
+
+    vm.registers.update(dr, result_address);
     vm.registers.update_r_cond_register(dr);
 }
+
+
+pub fn and(instruction: u16, vm: &mut VM){
+    
+    let dr = (instruction >> 9) & 0x7; 
+
+    let sr1 = (instruction >> 6) & 0x7; 
+
+    let imm_flag = (instruction >> 5) & 0x1; 
+
+    if imm_flag == 1{
+        
+        let imm5 = signed_extend(instruction & 0x1F, 5);
+        
+        vm.registers.update(dr, vm.registers.get(sr1) & imm5);
+    }
+    else{
+        
+        let sr2 = instruction & 0x7; 
+        vm.registers.update(dr, vm.registers.get(sr1) & vm.registers.get(sr2));
+    }
+    
+    vm.registers.update_r_cond_register(dr);
+}
+
+pub fn not(instruction: u16, vm: &mut VM){
+
+    let dr = (instruction >> 9) & 0x7;
+    let sr1 = (instruction >> 6) & 0x7; 
+
+    vm.registers.update(dr, !rm.registers.get(sr1));
+
+    vm.update_r_cond_register(dr);
+
+}
+
+
+pub fn br(instruction: u16, vm: &mut VM){
+
+    let pc_offset = signed_extend((instruction) & 0x1ff, 9);
+
+    let cond_flag = (instruction >> 9) & 0x7; 
+
+    if cond_flag & vm.registers.cond != 0 {
+
+        let val: u32 = vm:registers.pc as u32 + pc_offset as u32;
+        vm.registers.pc = val as u16; 
+    }
+}
+
+pub fn jmp(instructions: u16, vm: &mut VM){
+
+    let base_reg = (instruction >> 6) & 0x7;
+    vm.registers.pc = vm.registers.get(base_reg);
+
+}
+
+
+pub jsr(instruction: u16, vm: &mut VM){
+
+    let base_reg = (instruction > 6) & 0x7;
+
+    let long_pc_offset = signed_extend(instruction & 0x7ff, 11);
+
+    let long_flag = (instruction >> 11) & 1; 
+    
+    vm.registers.r7 = vm.registers.pc;
+    
+    if long_flag =! 0{
+
+        let val: u32 = vm.registers.pc as u32 + long_pc_offset as u32; 
+        vm.registers.update(pc) = val as u16;
+    }
+    else{
+        vm.registers.pc = vm.registers.get(base);
+    }
+}
+
+
+
+
+
+
+
