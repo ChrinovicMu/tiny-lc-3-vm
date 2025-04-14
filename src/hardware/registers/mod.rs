@@ -1,5 +1,5 @@
-// Define missing constant
-const PC_START: u16 = 0x3000; // Common starting address for LC-3, adjust if needed
+
+const PC_START: u16 = 0x3000; // Common starting address for LC-3
 
 pub struct Registers {
     pub r0: u16, 

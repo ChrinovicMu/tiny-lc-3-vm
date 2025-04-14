@@ -21,12 +21,12 @@ struct Cli {
 }
 
 fn main() {
-    // Some tricks to make the VM's terminal be interactive
+
+
     let stdin = 0;
     let termios = termios::Termios::from_fd(stdin).unwrap();
 
     // make a mutable copy of termios
-    // that we will modify
     let mut new_termios = termios.clone();
     new_termios.c_iflag &= IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON;
     new_termios.c_lflag &= !(ICANON | ECHO); // no echo and canonical mode
@@ -41,10 +41,10 @@ fn main() {
     let f = File::open(cli.path).expect("couldn't open file");
     let mut f = BufReader::new(f);
 
-    // Note how we're using `read_u16` _and_ BigEndian to read the binary file.
+    
     let base_address = f.read_u16::<BigEndian>().expect("error");
 
-    // Here we're loading the program in memory
+
     let mut address = base_address as usize;
     loop {
         match f.read_u16::<BigEndian>() {
@@ -65,7 +65,6 @@ fn main() {
 
     hardware::execute_program(&mut vm);
 
-    // reset the stdin to
-    // original termios data
+    // reset the stdin to orginal termio 
     tcsetattr(stdin, TCSANOW, &termios).unwrap();
 }
