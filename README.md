@@ -11,7 +11,7 @@ This project implements a virtual machine for the LC-3 Instruction Set Architect
 1. **Prerequisites**: Ensure you have Rust installed. You can install it via [rustup](https://rustup.rs/).
 2. **Clone the Repository**:
    ```bash
-   git clone git clone https://github.com/ChrinovicMu/tiny-lc-3-vm.git
+   git clone https://github.com/ChrinovicMu/tiny-lc-3-vm.git
    cd tiny-lc-3-vm
    ```
 3. **Build the Project**:
